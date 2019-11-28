@@ -5,7 +5,9 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from nltk.tokenize import WordPunctTokenizer
 import numpy as np
+
 # Load data
+print("Loading the Data")
 trn_texts = open("trn-reviews.txt").read().strip().split("\n")
 trn_labels = open("trn-labels.txt").read().strip().split("\n")
 print("Training data ...")
@@ -19,8 +21,8 @@ print("%d, %d" % (len(dev_texts), len(dev_labels)))
 
 # In[215]:
 
-
-glove = pd.read_csv("glove.6b.50d.txt", sep=' ', header=None, quotechar=None,  quoting=3)
+print("Processing the glove file")
+glove = pd.read_csv("glove.txt", sep=' ', header=None, quotechar=None,  quoting=3)
 dict = {}
 for i, row in glove.iterrows():
     if len(dict)%50000 ==0:
@@ -28,13 +30,13 @@ for i, row in glove.iterrows():
     dict[row[0]] = np.array(row.drop([0]))
 	
 	
-wtrn_data = numpy.array([WordPunctTokenizer().tokenize(i.lower()) for i in trn_texts])
-wdev_data = numpy.array([WordPunctTokenizer().tokenize(i.lower()) for i in dev_texts])
+wtrn_data = np.array([WordPunctTokenizer().tokenize(i.lower()) for i in trn_texts])
+wdev_data = np.array([WordPunctTokenizer().tokenize(i.lower()) for i in dev_texts])
 
 
 # In[216]:
 
-
+print("processing input data using glove embeddings")
 def txt_rep(data):
     new_data = np.array([[0]*50])
     k = 0
@@ -47,7 +49,7 @@ def txt_rep(data):
                 addition = np.sum([temp, addition], axis=0)
                 count+=1
             except: pass
-		new_data = np.append(new_data,[addition/count], axis=0)
+        new_data = np.append(new_data,[addition/count], axis=0)
         if k%1000 == 0:
             print(k)
         k+=1
@@ -60,7 +62,7 @@ print('this block is done')
 
 
 
-
+print("training the LR model with glove data")
 from sklearn.linear_model import LogisticRegression
 
 
@@ -80,7 +82,7 @@ print("Dev accuracy = %f", classifier.score(gdev_data, dev_labels))
 
 # In[ ]:
 
-
+print("extrating count vectors")
 choice = 1
 
 if choice == 1:
@@ -102,7 +104,7 @@ print(dev_data.shape)
 
 # In[ ]:
 
-
+print("preping final data with count vectors and the glove")
 def comb(data, gdata):
     new_data = np.array([[0]*77216])
     for i,j in zip(data,gdata):
@@ -124,7 +126,7 @@ ctrn_data.shape
 
 # In[ ]:
 
-
+print("training the LR model for 1.2")
 from sklearn.linear_model import LogisticRegression
 
 # Define a LR classifier
