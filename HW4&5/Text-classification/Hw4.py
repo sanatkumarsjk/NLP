@@ -105,13 +105,16 @@ print(dev_data.shape)
 # In[ ]:
 
 print("preping final data with count vectors and the glove")
-def comb(data, gdata):
-    new_data = np.array([[0]*77216])
-    for i,j in zip(data,gdata):
-        new_data = np.append(new_data, [np.append(i.toarray(), j )], axis=0)    
-    return new_data
-ctrn_data = comb(trn_data, gtrn_data)[1:]    
-cdev_data = comb(dev_data, gdev_data)[1:]    
+cdev_data = np.concatenate((dev_data.toarray(),gdev_data), axis=1)
+ctrn_data = np.concatenate((trn_data.toarray(),gtrn_data), axis=1)
+
+# def comb(data, gdata):
+#     new_data = np.array([[0]*77216])
+#     for i,j in zip(data,gdata):
+#         new_data = np.append(new_data, [np.append(i.toarray(), j )], axis=0)
+#     return new_data
+# ctrn_data = comb(trn_data, gtrn_data)[1:]
+# cdev_data = comb(dev_data, gdev_data)[1:]
 
 
 # In[ ]:
