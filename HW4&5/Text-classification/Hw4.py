@@ -1,12 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # 0. Package Dependency
-# 
-# - [nltk](https://www.nltk.org)
-# - [sklearn](http://scikit-learn.org/stable/)
-
-# In[214]:
 
 
 # Load packages
@@ -30,7 +21,13 @@ print("%d, %d" % (len(dev_texts), len(dev_labels)))
 
 
 glove = pd.read_csv("glove.6b.50d.txt", sep=' ', header=None, quotechar=None,  quoting=3)
-
+dict = {}
+for i, row in glove.iterrows():
+    if len(dict)%50000 ==0:
+        print(len(dict), "words completed")
+    dict[row[0]] = np.array(row.drop([0]))
+	
+	
 wtrn_data = numpy.array([WordPunctTokenizer().tokenize(i.lower()) for i in trn_texts])
 wdev_data = numpy.array([WordPunctTokenizer().tokenize(i.lower()) for i in dev_texts])
 
@@ -42,32 +39,26 @@ def txt_rep(data):
     new_data = np.array([[0]*50])
     k = 0
     for i in data:
-        addition = [0]*50
+        addition = np.array([0]*50)
         count = 0
-        df = glove[glove[0].isin(i)]
         for j in i:
             try:
-                temp = np.array(df[df[0] == j])
-                addition = np.sum([temp[0][1:], addition], axis=0)
+                temp = dict[j]
+                addition = np.sum([temp, addition], axis=0)
                 count+=1
-            except: pass #print(j)
-        new_data = np.append(new_data,[addition/count], axis=0)
-#         if k == 5:
-#             break
+            except: pass
+		new_data = np.append(new_data,[addition/count], axis=0)
+        if k%1000 == 0:
+            print(k)
         k+=1
-        
     return new_data
+
+
 gtrn_data = txt_rep(wtrn_data)[1:]
 gdev_data = txt_rep(wdev_data)[1:]
+print('this block is done')
 
 
-# In[ ]:
-
-
-print(gtrn_data.shape)
-
-
-# In[ ]:
 
 
 from sklearn.linear_model import LogisticRegression
