@@ -49,6 +49,7 @@ def txt_rep(data):
                 addition = np.sum([temp, addition], axis=0)
                 count+=1
             except: pass
+        count = max(1,count)
         new_data = np.append(new_data,[addition/count], axis=0)
         if k%1000 == 0:
             print(k)
