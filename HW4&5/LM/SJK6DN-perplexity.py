@@ -98,11 +98,11 @@ def train(data):
     loss_function = nn.NLLLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.1)
 
-    for epoch in range(1): 
+    for epoch in range(25): 
         iterations = 1
         for sentence in data:
             if iterations%5000 == 0:
-                print("Epoch number",epoch, " Iteration number", iterations)
+                print("Epoch number",epoch+1, " Iteration number", iterations)
             iterations += 1
 
             model.zero_grad()
@@ -145,7 +145,7 @@ print("Calculating the peplexity")
 trn_per = cal_perlexity(model, trn_data)
 print("Train perplexity is:", trn_per)
 dev_per = cal_perlexity(model, dev_data)
-print("Dev perplexity is:", trn_per)
+print("Dev perplexity is:", dev_per)
 
 
 # In[ ]:
