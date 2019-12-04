@@ -18,7 +18,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from nltk.tokenize import WordPunctTokenizer
 
 device = torch.device(f"cuda:0" if torch.cuda.is_available() else "cpu")
-print(device)
+print("Using:", device)
 # In[2]:
 
 

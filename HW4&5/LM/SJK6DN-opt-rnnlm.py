@@ -94,7 +94,7 @@ def train(data, model, optim):
     loss_function = nn.NLLLoss()
     optimizer = optim
 
-    for epoch in range(1): 
+    for epoch in range(10):
         iterations = 1
         for sentence in data:
             if iterations%5000 == 0:
