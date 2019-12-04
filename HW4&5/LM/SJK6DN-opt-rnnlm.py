@@ -142,10 +142,10 @@ HIDDEN_DIM = 32
 model = LM_LSTM(EMBEDDING_DIM, HIDDEN_DIM, len(vocab), len(vocab)).to(device)
 
 optimizers = [torch.optim.SGD(model.parameters(), lr=0.1),
-torch.optim.SGD(model.parameters(),momentum=0.5, lr=0.1),
-torch.optim.Adadelta(model.parameters(), lr=1.0, rho=0.9, eps=1e-06, weight_decay=0),
-torch.optim.Adagrad(model.parameters(), lr=0.01, lr_decay=0, weight_decay=0, initial_accumulator_value=0, eps=1e-10),
-torch.optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)]
+torch.optim.SGD(model.parameters(),momentum=0.5, lr=0.7),
+torch.optim.Adadelta(model.parameters(), lr=1.0),
+torch.optim.Adagrad(model.parameters(), lr=0.2),
+torch.optim.Adam(model.parameters(), lr=0.001)]
 
 for optim in optimizers:
     print("Using", optim)
