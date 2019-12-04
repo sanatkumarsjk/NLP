@@ -17,7 +17,7 @@ import torch.optim as optim
 from sklearn.feature_extraction.text import CountVectorizer
 from nltk.tokenize import WordPunctTokenizer
 
-device = torch.device(f"cuda:{args.gpu}" if torch.cuda.is_available() else "cpu")
+device = torch.device(f"cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 # In[2]:
 
@@ -83,13 +83,13 @@ class LM_LSTM(nn.Module):
         embeds = self.word_embeddings(sentence)
         lstm_out, _ = self.lstm(embeds.view(len(sentence), 1, -1))
         prob_space = self.hidden(lstm_out.view(len(sentence), -1))
-        prob_scores = F.softmax(prob_space, dim=1)
+        prob_scores = F.log_softmax(prob_space, dim=1)
         return prob_scores
 
 
 # In[5]:
 
-
+print("Training the model")
 def train(data):
     #hyper parameters
     EMBEDDING_DIM = 32
@@ -101,9 +101,8 @@ def train(data):
     for epoch in range(1): 
         iterations = 1
         for sentence in data:
-            if iterations%1000 == 0:
+            if iterations%5000 == 0:
                 print("Epoch number",epoch, " Iteration number", iterations)
-#                 break
             iterations += 1
 
             model.zero_grad()
@@ -127,9 +126,8 @@ def cal_perlexity(model, data):
     samp_count = 0
     count = 1
     for sample in data:
-        if count%1000 == 0:
+        if count%5000 == 0:
             print(count)
-#             break
         count+=1    
         samp_count += len(sample)
         with torch.no_grad():       
