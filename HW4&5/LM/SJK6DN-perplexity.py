@@ -3,23 +3,27 @@
 
 # # Importing packages and processing the data
 
-# In[8]:
+# In[1]:
 
 
+import math
 import torch
 import pandas as pd
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+
 from sklearn.feature_extraction.text import CountVectorizer
 from nltk.tokenize import WordPunctTokenizer
 
-
-# In[9]:
+device = torch.device(f"cuda:{args.gpu}" if torch.cuda.is_available() else "cpu")
+print(device)
+# In[2]:
 
 
 # generating vocab
+print("processing the Data")
 vocab = {}
 id = 0
 
@@ -31,7 +35,7 @@ for i in open("trn-wiki.txt", encoding="utf8"):
             id+=1
 
 
-# In[10]:
+# In[3]:
 
 
 def generate_indices(file):
@@ -60,7 +64,7 @@ dev_data = generate_indices(open("dev-wiki.txt", encoding="utf8"))
 # - Optimizer = SGD
 # - Sentence length = Any
 
-# In[11]:
+# In[4]:
 
 
 class LM_LSTM(nn.Module):
@@ -83,29 +87,30 @@ class LM_LSTM(nn.Module):
         return prob_scores
 
 
-# In[40]:
+# In[5]:
 
 
 def train(data):
     #hyper parameters
     EMBEDDING_DIM = 32
     HIDDEN_DIM = 32
-    model = LM_LSTM(EMBEDDING_DIM, HIDDEN_DIM, len(vocab), len(vocab))
+    model = LM_LSTM(EMBEDDING_DIM, HIDDEN_DIM, len(vocab), len(vocab)).to(device)
     loss_function = nn.NLLLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.1)
 
     for epoch in range(1): 
         iterations = 1
         for sentence in data:
-            if iterations%2 == 0:
+            if iterations%1000 == 0:
                 print("Epoch number",epoch, " Iteration number", iterations)
+#                 break
             iterations += 1
 
             model.zero_grad()
 
-            prob_scores = model( torch.LongTensor(sentence[:-1]))
+            prob_scores = model( torch.LongTensor(sentence[:-1]).to(device))
 
-            loss = loss_function(prob_scores,  torch.LongTensor(sentence[1:]))
+            loss = loss_function(prob_scores,  torch.LongTensor(sentence[1:]).to(device))
             loss.backward()
             optimizer.step()
     return model
@@ -114,29 +119,39 @@ model = train(trn_data)
 
 # # Calculating perplexity 
 
-# In[56]:
+# In[33]:
 
 
 def cal_perlexity(model, data):
     sum = 0 
     samp_count = 0
-    
+    count = 1
     for sample in data:
+        if count%1000 == 0:
+            print(count)
+#             break
+        count+=1    
         samp_count += len(sample)
-        
         with torch.no_grad():       
-            prob_scores = model( torch.LongTensor(sample[:-1]))
+            prob_scores = model( torch.LongTensor(sample[:-1]).to(device))
             
             for index in range(len(prob_scores)):
                 sum += prob_scores[index][sample[index]]
-    return sum/samp_count           
+    return math.exp(-(sum/samp_count))           
+
+
+# In[6]:
+
+
+print("Calculating the peplexity")
+trn_per = cal_perlexity(model, trn_data)
+print("Train perplexity is:", trn_per)
+dev_per = cal_perlexity(model, dev_data)
+print("Dev perplexity is:", trn_per)
 
 
 # In[ ]:
 
 
-trn_per = cal_perlexity(model, trn_data)
-print("Train perplexity is:", trn_per)
-dev_per = cal_perlexity(model, dev_data)
-print("Dev perplexity is:", trn_per)
+
 
