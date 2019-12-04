@@ -82,7 +82,7 @@ class LM_LSTM(nn.Module):
         embeds = self.word_embeddings(sentence)
         lstm_out, _ = self.lstm(embeds.view(len(sentence), 1, -1))
         prob_space = self.hidden(lstm_out.view(len(sentence), -1))
-        prob_scores = F.softmax(prob_space, dim=1)
+        prob_scores = F.log_softmax(prob_space, dim=1)
         return prob_scores
 
 
