@@ -3,25 +3,28 @@
 
 # # Importing packages and processing the data
 
-# In[1]:
+# In[14]:
 
 
+import math
 import torch
 import pandas as pd
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+
 from sklearn.feature_extraction.text import CountVectorizer
 from nltk.tokenize import WordPunctTokenizer
 
-
-# In[2]:
+device = torch.device(f"cuda:0" if torch.cuda.is_available() else "cpu")
+print("Using:", device)
+# In[15]:
 
 
 # generating vocab
 vocab = {}
-id = 1
+id = 0
 
 for i in open("trn-wiki.txt", encoding="utf8"):
     tokens = i.split()
@@ -31,7 +34,7 @@ for i in open("trn-wiki.txt", encoding="utf8"):
             id+=1
 
 
-# In[3]:
+# In[16]:
 
 
 def generate_indices(file):
@@ -60,7 +63,7 @@ dev_data = generate_indices(open("dev-wiki.txt", encoding="utf8"))
 # - Optimizer = SGD
 # - Sentence length = Any
 
-# In[4]:
+# In[17]:
 
 
 class LM_LSTM(nn.Module):
@@ -83,14 +86,11 @@ class LM_LSTM(nn.Module):
         return prob_scores
 
 
-# In[1]:
+# In[18]:
 
 
-def train(data):
+def train(data, model):
     #hyper parameters
-    EMBEDDING_DIM = 32
-    HIDDEN_DIM = 32
-    model = LM_LSTM(EMBEDDING_DIM, HIDDEN_DIM, len(vocab), len(vocab))
     loss_function = nn.NLLLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.1)
 
@@ -103,13 +103,50 @@ def train(data):
 
             model.zero_grad()
 
-            prob_scores = model( torch.LongTensor(sentence[:-1]))
+            prob_scores = model( torch.LongTensor(sentence[:-1]).to(device))
 
-            loss = loss_function(prob_scores,  torch.LongTensor(sentence[1:]))
+            loss = loss_function(prob_scores,  torch.LongTensor(sentence[1:]).to(device))
             loss.backward()
             optimizer.step()
     return model
-model = train(trn_data)
+
+
+# # Calculating perplexity 
+
+# In[19]:
+
+
+def cal_perlexity(model, data):
+    sum = 0 
+    samp_count = 0
+    count = 1
+    for sample in data:
+        if count%5000 == 0:
+            print("Analzed", count,"samples for perplexity")
+        count+=1    
+        samp_count += len(sample)
+        with torch.no_grad():       
+            prob_scores = model( torch.LongTensor(sample[:-1]).to(device))
+            
+            for index in range(len(prob_scores)):
+                sum += prob_scores[index][sample[index]]
+    return math.exp(-(sum/samp_count))           
+
+
+# In[20]:
+
+
+
+dimensions = [64, 128, 256]
+
+for i in dimensions:
+    print("Training model with embedding dimensions:", i, " and hidden dimensions:", i)
+    model = LM_LSTM(i, i, len(vocab), len(vocab)).to(device)
+    model = train(trn_data, model)
+    trn_per = cal_perlexity(model, trn_data)
+    print("Train perplexity is:", trn_per)
+    dev_per = cal_perlexity(model, dev_data)
+    print("Dev perplexity is:", dev_per)
 
 
 # In[ ]:
