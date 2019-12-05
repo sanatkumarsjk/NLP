@@ -122,7 +122,7 @@ def cal_perlexity(model, data):
     count = 1
     for sample in data:
         if count%5000 == 0:
-            print("Analzed", count,"samples for perplexity")
+            print("Analyzed", count,"samples for perplexity")
         count+=1    
         samp_count += len(sample)
         with torch.no_grad():       
