@@ -98,7 +98,7 @@ def train(data):
     loss_function = nn.NLLLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.1)
 
-    for epoch in range(25): 
+    for epoch in range(50): 
         iterations = 1
         for sentence in data:
             if iterations%5000 == 0:

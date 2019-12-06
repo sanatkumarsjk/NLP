@@ -85,9 +85,9 @@ class LM_LSTM(nn.Module):
         embeds = self.word_embeddings(sentence)
         lstm_out, _ = self.lstm(embeds.view(len(sentence), 1, -1))
         lstm_out1, _ = self.lstm1(lstm_out.view(len(sentence), 1, -1))
-        lstm_out2, _ = self.lstm1(lstm_out1.view(len(sentence), 1, -1))
-        lstm_out3, _ = self.lstm1(lstm_out2.view(len(sentence), 1, -1))
-        prob_space = self.hidden(lstm_out3.view(len(sentence), -1))
+       # lstm_out2, _ = self.lstm2(lstm_out1.view(len(sentence), 1, -1))
+       # lstm_out3, _ = self.lstm1(lstm_out2.view(len(sentence), 1, -1))
+        prob_space = self.hidden(lstm_out1.view(len(sentence), -1))
         prob_scores = F.log_softmax(prob_space, dim=1)
         return prob_scores
 
